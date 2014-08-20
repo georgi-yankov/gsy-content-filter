@@ -30,6 +30,4 @@
 
 require_once 'includes/class-gsy-content-filter.php';
 
-if (is_admin()) {
-    $gsy_content_filter = new GSY_Content_Filter();
-}
+$gsy_content_filter = new GSY_Content_Filter();
