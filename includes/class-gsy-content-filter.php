@@ -202,10 +202,6 @@ if (!class_exists('GSY_Content_Filter')) {
                 'the_tags' => 'tags',
             );
             $this->_options = get_option('gsy_content_filter_options');
-            
-            foreach ($this->_options as $key => $value) {
-                 
-            }
 
 //            add_filter($this->_options['filter_type'], array($this, 'do_filtering'));
         }
