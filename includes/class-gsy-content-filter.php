@@ -11,7 +11,10 @@ if (!class_exists('GSY_Content_Filter')) {
         /**
          * Holds all possible filters to be added
          */
-        private $_filters;
+        private $_filters = array(
+            'the_title' => 'title',
+            'the_content' => 'content',
+        );
 
         /**
          * Holds the number of form fields for each type
@@ -22,9 +25,27 @@ if (!class_exists('GSY_Content_Filter')) {
          * Start up
          */
         public function __construct() {
+            add_action('admin_enqueue_scripts', array($this, 'gsy_content_filter_add_styles'));
+            add_action('admin_enqueue_scripts', array($this, 'gsy_content_filter_add_scripts'));
             add_action('admin_menu', array($this, 'add_plugin_page'));
             add_action('admin_init', array($this, 'page_init'));
             $this->add_filters();
+        }
+
+        /**
+         * Adding styles for admin page
+         */
+        public function gsy_content_filter_add_styles() {
+            $style_src = plugins_url('../css/style.css', __FILE__);
+            wp_enqueue_style('gsy-content-filter-style', $style_src);
+        }
+
+        /**
+         * Adding scripts for admin page
+         */
+        public function gsy_content_filter_add_scripts() {
+            $script_src = plugins_url('../js/script.js', __FILE__);
+            wp_enqueue_script('gsy-content-filter-script', $script_src);
         }
 
         /**
@@ -42,13 +63,19 @@ if (!class_exists('GSY_Content_Filter')) {
             // Set class property
             $this->_options = get_option('gsy_content_filter_options');
             ?>
-            <div class="wrap">
+            <div id="gsy-content-filter" class="wrap">
                 <h2><?php _e('GSY Content Filter', 'gsy-content-filter'); ?></h2>           
                 <form method="post" action="options.php" role="form">
                     <?php
                     // This prints out all hidden setting fields
                     settings_fields('gsy_content_filter_group');
                     do_settings_sections('gsy-content-filter');
+                    ?>
+                    <p>
+                        <button class="add-filter">add</button>
+                        <button class="remove-all-filters">remove all</button>
+                    </p>
+                    <?php
                     submit_button();
                     ?>
                 </form>
@@ -68,7 +95,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
             add_settings_section(
                     'gsy_content_filter_section', // ID
-                    'Settings', // Title
+                    'Filters', // Title
                     array($this, 'print_section_info'), // Callback
                     'gsy-content-filter' // Page
             );
@@ -128,9 +155,8 @@ if (!class_exists('GSY_Content_Filter')) {
 //                }
 //            }
 //
-//            return $sanitized_input;
-            
-            
+//            return $sanitized_input;            
+
             return $input;
         }
 
@@ -138,7 +164,7 @@ if (!class_exists('GSY_Content_Filter')) {
          * Print the Section text
          */
         public function print_section_info() {
-            print 'Enter your settings below:';
+            
         }
 
         /**
@@ -149,7 +175,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $field_id = 'old_word_' . $arg_list[0];
 
             printf(
-                    '<input type="text" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" class="old-word" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
         }
 
@@ -161,7 +187,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $field_id = 'new_word_' . $arg_list[0];
 
             printf(
-                    '<input type="text" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" class="new-word" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
         }
 
@@ -169,41 +195,45 @@ if (!class_exists('GSY_Content_Filter')) {
             $arg_list = func_get_args();
             $field_id = 'filter_type_' . $arg_list[0];
 
-            $html = '<select name="gsy_content_filter_options[' . $field_id . ']" id="' . $field_id . '">';
+            $html = '<select class="filter-type" name="gsy_content_filter_options[' . $field_id . '][]" id="' . $field_id . '" disabled="disabled" multiple="multiple">';
             foreach ($this->_filters as $k => $v) {
                 $selected = false;
-                if ($k == $this->_options[$field_id]) {
+
+                if (isset($this->_options[$field_id]) && in_array($k, $this->_options[$field_id])) {
                     $selected = true;
                 }
-                $html .= '<option ' . selected($selected, true, false) . ' value="' . esc_attr($k) . '">' . $v . '</option>';
+                $html .= '<option ' . selected($selected, true, false) . ' value="' . $k . '">' . $v . '</option>';
             }
             $html .= '</select> ';
 
             echo $html;
         }
 
-        public function do_filtering($content) {
-            if (isset($this->_options['filter_type'])) {
-
-                $old_word = $this->_options['old_word'];
-                $new_word = $this->_options['new_word'];
-
-                $content = str_ireplace($old_word, $new_word, $content);
-
-                return $content;
-            }
-        }
-
         public function add_filters() {
-            $this->_filters = array(
-                'the_title' => 'title',
-                'the_content' => 'content',
-                'the_excerpt' => 'excerpt',
-                'the_tags' => 'tags',
-            );
             $this->_options = get_option('gsy_content_filter_options');
 
-//            add_filter($this->_options['filter_type'], array($this, 'do_filtering'));
+            add_filter('the_title', array($this, 'the_title_callback'));
+            add_filter('the_content', array($this, 'the_content_callback'));
+        }
+
+        public function the_title_callback($content) {
+            for ($i = 1; $i <= $this->_count; $i++) {
+                if (!empty($this->_options['old_word_' . $i]) && in_array('the_title', $this->_options['filter_type_' . $i])) {
+                    $content = str_ireplace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
+                }
+            }
+
+            return $content;
+        }
+
+        public function the_content_callback($content) {
+            for ($i = 1; $i <= $this->_count; $i++) {
+                if (!empty($this->_options['old_word_' . $i]) && in_array('the_content', $this->_options['filter_type_' . $i])) {
+                    $content = str_ireplace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
+                }
+            }
+
+            return $content;
         }
 
     }
