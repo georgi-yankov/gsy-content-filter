@@ -1,7 +1,26 @@
 #gsy-content-filter {
     .form-table {
-        tr {            
+        tr {
             display: none;
+            
+            &:nth-child(6n+1),
+            &:nth-child(6n+2),
+            &:nth-child(6n+3){
+                background: #e1e1e1;
+            }   
+            
+            th {
+                padding-left: 10px;
+            }
+            
         }
+    }
+    
+    .old-word,
+    .new-word,
+    .filter-type {
+        margin: 1px;
+        padding: 3px 5x;
+        width: 177px;
     }
 }

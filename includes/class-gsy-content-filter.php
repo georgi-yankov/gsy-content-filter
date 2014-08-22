@@ -45,7 +45,7 @@ if (!class_exists('GSY_Content_Filter')) {
          */
         public function gsy_content_filter_add_scripts() {
             $script_src = plugins_url('../js/script.js', __FILE__);
-            wp_enqueue_script('gsy-content-filter-script', $script_src);
+            wp_enqueue_script('gsy-content-filter-script', $script_src, array('jquery'));
         }
 
         /**

@@ -1,3 +1,16 @@
 #gsy-content-filter .form-table tr {
   display: none;
 }
+#gsy-content-filter .form-table tr:nth-child(6n+1), #gsy-content-filter .form-table tr:nth-child(6n+2), #gsy-content-filter .form-table tr:nth-child(6n+3) {
+  background: #e1e1e1;
+}
+#gsy-content-filter .form-table tr th {
+  padding-left: 10px;
+}
+#gsy-content-filter .old-word,
+#gsy-content-filter .new-word,
+#gsy-content-filter .filter-type {
+  margin: 1px;
+  padding: 3px 5x;
+  width: 177px;
+}

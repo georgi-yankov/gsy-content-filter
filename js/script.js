@@ -18,7 +18,7 @@
 
         checkForFilledElements();
 
-        // If the field Old Word is not empty then
+        // If a field Old Word is not empty then
         // enable and show all corresponding elements
         function checkForFilledElements() {
 
@@ -55,20 +55,37 @@
                             .nextAll(':lt(2)')
                             .show('slow');
 
+                    if ($('tr', formTable).filter(":hidden").size() === 0) {
+                        addFilterBtn.attr('disabled', 'disabled');
+                    }
+
                     return false;
                 }
 
             });
-            
-            // TO DO: IN NO FILTER TO ADD DESABLE THE BUTTON
-            // TO DO: IF NO FILTERS DISABLE THE REMOVE ALL BUTTON
 
+            if (removeAllFiltersBtn.prop('disabled')) {
+                removeAllFiltersBtn.removeAttr('disabled');
+            }
         }
 
+        // Remove all existed filters
         function removeAllFilters(event) {
             event.preventDefault();
+
+            if (!window.confirm('Are you sure you want to remove all filters?')) {
+                return false;
+            }
+
             $('tr', formTable).hide('slow');
-            $('tr .old-word, tr .new-word, tr .filter-type', formTable).attr('disabled', 'disabled')
+            $('tr .old-word, tr .new-word, tr .filter-type', formTable).attr('disabled', 'disabled');
+
+            removeAllFiltersBtn.attr('disabled', 'disabled');
+
+            if (addFilterBtn.prop('disabled')) {
+                addFilterBtn.removeAttr('disabled');
+            }
+
         }
 
     });
