@@ -218,7 +218,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
             echo '<p>';
             printf(
-                    '<input type="text" class="old-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" required="required" class="old-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
             echo '<button class="delete-this-filter btn btn-danger btn-sm">' . __('delete', 'gsy-content-filter') . '</button>';
             echo '</p>';
@@ -232,7 +232,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $field_id = 'new_word_' . $arg_list[0];
 
             printf(
-                    '<input type="text" class="new-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" required="required" class="new-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
         }
 
@@ -240,7 +240,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $arg_list = func_get_args();
             $field_id = 'filter_type_' . $arg_list[0];
 
-            $html = '<select class="filter-type form-control" name="gsy_content_filter_options[' . $field_id . '][]" id="' . $field_id . '" disabled="disabled" multiple="multiple">';
+            $html = '<select required="required" class="filter-type form-control" name="gsy_content_filter_options[' . $field_id . '][]" id="' . $field_id . '" disabled="disabled" multiple="multiple">';
             foreach ($this->_filters as $k => $v) {
                 $selected = false;
 
