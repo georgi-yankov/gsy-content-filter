@@ -11,13 +11,6 @@ body {
         tr {
             display: none;
             
-            /*            &:nth-child(8n+1),
-                &:nth-child(8n+2),
-                &:nth-child(8n+3),
-                &:nth-child(8n+4){
-                background: #e1e1e1;
-            }   */
-            
             th {
                 padding-top: 15px;
                 padding-bottom: 15px;
@@ -27,11 +20,6 @@ body {
             td {
                 padding-top: 10px;
                 padding-bottom: 10px;
-            }
-            
-            th,
-            td {
-                /*padding-left: 10px;*/
             }
             
         }
