@@ -21,7 +21,7 @@ if (!class_exists('GSY_Content_Filter')) {
         /**
          * Holds the number of form fields for each type
          */
-        private $_count = 2;
+        private $_count = 20;
 
         /**
          * Start up
