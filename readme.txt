@@ -22,6 +22,7 @@ original text.
 1. Upload the `gsy-content-filter` directory (including all files within) to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Settings are available in `Settings` > `GSY Content Filter`
+1. The plugin is internationalized and localized for both English and Bulgarian
 
 == Frequently Asked Questions ==
 

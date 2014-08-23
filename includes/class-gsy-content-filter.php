@@ -144,7 +144,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
                 add_settings_field(
                         'case_sensitive_' . $i, // ID
-                        __('', 'gsy-content-filter'), // Title
+                        '', // Title
                         array($this, 'case_sensitive_callback'), // Callback
                         'gsy-content-filter', // Page 
                         'gsy_content_filter_section', // Section
