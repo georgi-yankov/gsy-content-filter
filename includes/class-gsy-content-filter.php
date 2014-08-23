@@ -14,6 +14,7 @@ if (!class_exists('GSY_Content_Filter')) {
         private $_filters = array(
             'the_title' => 'title',
             'the_content' => 'content',
+            'the_excerpt' => 'excerpt',
         );
 
         /**
@@ -258,6 +259,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
             add_filter('the_title', array($this, 'the_title_callback'));
             add_filter('the_content', array($this, 'the_content_callback'));
+            add_filter('the_excerpt', array($this, 'the_excerpt_callback'));
         }
 
         public function the_title_callback($content) {
@@ -280,6 +282,23 @@ if (!class_exists('GSY_Content_Filter')) {
         public function the_content_callback($content) {
             for ($i = 1; $i <= $this->_count; $i++) {
                 if (!empty($this->_options['old_word_' . $i]) && in_array('the_content', $this->_options['filter_type_' . $i])) {
+
+                    if (isset($this->_options['case_sensitive_' . $i])) {
+                        $replace = 'str_replace'; // for case-sensitive replace
+                    } else {
+                        $replace = 'str_ireplace'; // for case-insensitive replace
+                    }
+
+                    $content = $replace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
+                }
+            }
+
+            return $content;
+        }
+
+        public function the_excerpt_callback($content) {
+            for ($i = 1; $i <= $this->_count; $i++) {
+                if (!empty($this->_options['old_word_' . $i]) && in_array('the_excerpt', $this->_options['filter_type_' . $i])) {
 
                     if (isset($this->_options['case_sensitive_' . $i])) {
                         $replace = 'str_replace'; // for case-sensitive replace
