@@ -6,11 +6,11 @@ Tested up to: 3.9.2
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Temporarily or permanent filter key words from the title, content, excerpt or tags in posts.
+Temporarily or permanently filter key words from the title, content, excerpt or tags in posts.
 
 == Description ==
 
-The plugin allows you to temporarily or permanent filter certain words from the
+The plugin allows you to temporarily or permanently filter certain words from the
 title, content, excerpt or tags in posts.
 
 You can choose where to search exactly or select everywhere in the posts. The
