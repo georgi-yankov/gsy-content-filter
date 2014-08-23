@@ -1,10 +1,19 @@
 #gsy-content-filter .form-table tr {
   display: none;
 }
-#gsy-content-filter .form-table tr:nth-child(6n+1), #gsy-content-filter .form-table tr:nth-child(6n+2), #gsy-content-filter .form-table tr:nth-child(6n+3) {
+#gsy-content-filter .form-table tr:nth-child(8n+1), #gsy-content-filter .form-table tr:nth-child(8n+2), #gsy-content-filter .form-table tr:nth-child(8n+3), #gsy-content-filter .form-table tr:nth-child(8n+4) {
   background: #e1e1e1;
 }
 #gsy-content-filter .form-table tr th {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+#gsy-content-filter .form-table tr td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+#gsy-content-filter .form-table tr th,
+#gsy-content-filter .form-table tr td {
   padding-left: 10px;
 }
 #gsy-content-filter .old-word,
@@ -13,4 +22,7 @@
   margin: 1px;
   padding: 3px 5x;
   width: 177px;
+}
+#gsy-content-filter .delete-this-filter {
+  margin-left: 10px;
 }

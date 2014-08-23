@@ -72,8 +72,8 @@ if (!class_exists('GSY_Content_Filter')) {
                     do_settings_sections('gsy-content-filter');
                     ?>
                     <p>
-                        <button class="add-filter">add</button>
-                        <button class="remove-all-filters">remove all</button>
+                        <button class="add-filter"><?php _e('add', 'gsy-content-filter'); ?></button>
+                        <button class="remove-all-filters" disabled="disabled"><?php _e('remove all', 'gsy-content-filter'); ?></button>
                     </p>
                     <?php
                     submit_button();
@@ -95,7 +95,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
             add_settings_section(
                     'gsy_content_filter_section', // ID
-                    'Filters', // Title
+                    __('Filters', 'gsy-content-filter'), // Title
                     array($this, 'print_section_info'), // Callback
                     'gsy-content-filter' // Page
             );
@@ -103,7 +103,7 @@ if (!class_exists('GSY_Content_Filter')) {
             for ($i = 1; $i <= $this->_count; $i++) {
                 add_settings_field(
                         'old_word_' . $i, // ID
-                        'Old Word ' . $i, // Title 
+                        __('Search for word:', 'gsy-content-filter'), // Title 
                         array($this, 'old_word_callback'), // Callback
                         'gsy-content-filter', // Page
                         'gsy_content_filter_section', // Section
@@ -112,7 +112,7 @@ if (!class_exists('GSY_Content_Filter')) {
 
                 add_settings_field(
                         'new_word_' . $i, // ID
-                        'New Word ' . $i, // Title
+                        __('Replace with:', 'gsy-content-filter'), // Title
                         array($this, 'new_word_callback'), // Callback
                         'gsy-content-filter', // Page 
                         'gsy_content_filter_section', // Section
@@ -121,8 +121,17 @@ if (!class_exists('GSY_Content_Filter')) {
 
                 add_settings_field(
                         'filter_type_' . $i, // ID
-                        'Filter Type ' . $i, // Title
+                        __('Search in:', 'gsy-content-filter'), // Title
                         array($this, 'filter_type_callback'), // Callback
+                        'gsy-content-filter', // Page 
+                        'gsy_content_filter_section', // Section
+                        $i // Additional argument
+                );
+
+                add_settings_field(
+                        'case_sensitive_' . $i, // ID
+                        __('', 'gsy-content-filter'), // Title
+                        array($this, 'case_sensitive_callback'), // Callback
                         'gsy-content-filter', // Page 
                         'gsy_content_filter_section', // Section
                         $i // Additional argument
@@ -136,28 +145,41 @@ if (!class_exists('GSY_Content_Filter')) {
          * @param array $input Contains all settings fields as array keys
          */
         public function sanitize($input) {
-//            $sanitized_input = array();
-//
-//            if (isset($input['old_word'])) {
-//                $sanitized_input['old_word'] = sanitize_text_field($input['old_word']);
-//            }
-//
-//            if (isset($input['new_word'])) {
-//                $sanitized_input['new_word'] = sanitize_text_field($input['new_word']);
-//            }
-//
-//            if (isset($input['filter_type'])) {
-//
-//                if (array_key_exists($input['filter_type'], $this->_filters)) {
-//                    $sanitized_input['filter_type'] = $input['filter_type'];
-//                } else {
-//                    $sanitized_input['filter_type'] = 'the_title'; // TO DO: get default value dynamically, 'the_title' is hard coded now
-//                }
-//            }
-//
-//            return $sanitized_input;            
+            $sanitized_input = array();
 
-            return $input;
+            for ($i = 1; $i <= $this->_count; $i++) {
+
+                if (isset($input['old_word_' . $i])) {
+                    $sanitized_input['old_word_' . $i] = sanitize_text_field($input['old_word_' . $i]);
+                }
+
+                if (isset($input['new_word_' . $i])) {
+                    $sanitized_input['new_word_' . $i] = sanitize_text_field($input['new_word_' . $i]);
+                }
+
+                if (isset($input['filter_type_' . $i])) {
+                    $sanitized_input['filter_type_' . $i] = $input['filter_type_' . $i];
+
+                    foreach ($input['filter_type_' . $i] as $key => $value) {
+                        if (!array_key_exists($value, $this->_filters)) {
+                            $sanitized_input['filter_type_' . $i] = array('the_title'); // default value if not a correct filter type                      
+                            break;
+                        }
+                    }
+                } else {
+                    if (isset($input['old_word_' . $i])) {
+                        $sanitized_input['filter_type_' . $i] = array('the_title'); // default value if non selected
+                    }
+                }
+
+                if (isset($input['case_sensitive_' . $i])) {
+                    if ($input['case_sensitive_' . $i] === 'on' || $input['case_sensitive_' . $i] === '') {
+                        $sanitized_input['case_sensitive_' . $i] = $input['case_sensitive_' . $i];
+                    }
+                }
+            }
+
+            return $sanitized_input;
         }
 
         /**
@@ -174,9 +196,12 @@ if (!class_exists('GSY_Content_Filter')) {
             $arg_list = func_get_args();
             $field_id = 'old_word_' . $arg_list[0];
 
+            echo '<p>';
             printf(
                     '<input type="text" class="old-word" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
+            echo '<button class="delete-this-filter">' . __('delete this filter', 'gsy-content-filter') . '</button>';
+            echo '</p>';
         }
 
         /**
@@ -202,13 +227,32 @@ if (!class_exists('GSY_Content_Filter')) {
                 if (isset($this->_options[$field_id]) && in_array($k, $this->_options[$field_id])) {
                     $selected = true;
                 }
-                $html .= '<option ' . selected($selected, true, false) . ' value="' . $k . '">' . $v . '</option>';
+                $html .= '<option ' . selected($selected, true, false) . ' value="' . esc_attr($k) . '">' . $v . '</option>';
             }
             $html .= '</select> ';
 
             echo $html;
         }
 
+        public function case_sensitive_callback() {
+            $arg_list = func_get_args();
+            $field_id = 'case_sensitive_' . $arg_list[0];
+
+            if (isset($this->_options[$field_id])) {
+                $checked = checked($this->_options[$field_id], 'on', false);
+            } else {
+                $checked = '';
+            }
+
+            $html = '<input type="checkbox" class="case-sensitive" name="gsy_content_filter_options[' . $field_id . ']" id="' . $field_id . '" ' . $checked . ' disabled="disabled"  />';
+            $html .= '<label for="' . $field_id . '" >' . __('case sensitive', 'gsy-content-filter') . '</label>';
+
+            echo $html;
+        }
+
+        /**
+         * Add filter tagas where to search for
+         */
         public function add_filters() {
             $this->_options = get_option('gsy_content_filter_options');
 
@@ -219,7 +263,14 @@ if (!class_exists('GSY_Content_Filter')) {
         public function the_title_callback($content) {
             for ($i = 1; $i <= $this->_count; $i++) {
                 if (!empty($this->_options['old_word_' . $i]) && in_array('the_title', $this->_options['filter_type_' . $i])) {
-                    $content = str_ireplace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
+
+                    if (isset($this->_options['case_sensitive_' . $i])) {
+                        $replace = 'str_replace'; // for case-sensitive replace
+                    } else {
+                        $replace = 'str_ireplace'; // for case-insensitive replace
+                    }
+
+                    $content = $replace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
                 }
             }
 
@@ -229,7 +280,14 @@ if (!class_exists('GSY_Content_Filter')) {
         public function the_content_callback($content) {
             for ($i = 1; $i <= $this->_count; $i++) {
                 if (!empty($this->_options['old_word_' . $i]) && in_array('the_content', $this->_options['filter_type_' . $i])) {
-                    $content = str_ireplace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
+
+                    if (isset($this->_options['case_sensitive_' . $i])) {
+                        $replace = 'str_replace'; // for case-sensitive replace
+                    } else {
+                        $replace = 'str_ireplace'; // for case-insensitive replace
+                    }
+
+                    $content = $replace($this->_options['old_word_' . $i], $this->_options['new_word_' . $i], $content);
                 }
             }
 
