@@ -37,9 +37,18 @@ if (!class_exists('GSY_Content_Filter')) {
         /**
          * Adding styles for admin page
          */
-        public function gsy_content_filter_add_styles() {
-            $style_src = plugins_url('../css/style.css', __FILE__);
-            wp_enqueue_style('gsy-content-filter-style', $style_src);
+        public function gsy_content_filter_add_styles($hook) {
+            // Load styles only for the plugin's option page
+            if ($hook === 'settings_page_gsy-content-filter') {
+                $style_src = '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css';
+                wp_enqueue_style('gsy-content-filter-bootstrap', $style_src);
+
+                $style_src = '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css';
+                wp_enqueue_style('gsy-content-filter-bootstrap-theme', $style_src);
+
+                $style_src = plugins_url('../css/style.css', __FILE__);
+                wp_enqueue_style('gsy-content-filter-style', $style_src);
+            }
         }
 
         /**
@@ -55,7 +64,7 @@ if (!class_exists('GSY_Content_Filter')) {
          */
         public function add_plugin_page() {
             // This page will be under "Settings"
-            add_options_page('GSY Content Filter', 'GSY Content Filter', 'manage_options', 'gsy-content-filter', array($this, 'create_admin_page'));
+            add_options_page(__('GSY Content Filter', 'gsy-content-filter'), __('GSY Content Filter', 'gsy-content-filter'), 'manage_options', 'gsy-content-filter', array($this, 'create_admin_page'));
         }
 
         /**
@@ -68,18 +77,21 @@ if (!class_exists('GSY_Content_Filter')) {
             <div id="gsy-content-filter" class="wrap">
                 <h2><?php _e('GSY Content Filter', 'gsy-content-filter'); ?></h2>           
                 <form method="post" action="options.php" role="form">
-                    <?php
-                    // This prints out all hidden setting fields
-                    settings_fields('gsy_content_filter_group');
-                    do_settings_sections('gsy-content-filter');
-                    ?>
-                    <p>
-                        <button class="add-filter"><?php _e('add', 'gsy-content-filter'); ?></button>
-                        <button class="remove-all-filters" disabled="disabled"><?php _e('remove all', 'gsy-content-filter'); ?></button>
-                    </p>
-                    <?php
-                    submit_button();
-                    ?>
+                    <div class="form-inline">
+                        <?php
+                        // This prints out all hidden setting fields
+                        settings_fields('gsy_content_filter_group');
+                        do_settings_sections('gsy-content-filter');
+                        ?>
+                        <p>
+                            <button class="add-filter btn btn-success btn-sm">
+                                <?php _e('add more', 'gsy-content-filter'); ?>
+                            </button>                        
+                        </p>
+                        <?php
+                        submit_button();
+                        ?>
+                    </div>
                 </form>
             </div>
             <?php
@@ -188,7 +200,13 @@ if (!class_exists('GSY_Content_Filter')) {
          * Print the Section text
          */
         public function print_section_info() {
-            
+            ?>
+            <p>
+                <button class="remove-all-filters btn btn-danger btn-sm" disabled="disabled">
+                    <?php _e('remove all', 'gsy-content-filter'); ?>
+                </button>
+            </p>
+            <?php
         }
 
         /**
@@ -200,9 +218,9 @@ if (!class_exists('GSY_Content_Filter')) {
 
             echo '<p>';
             printf(
-                    '<input type="text" class="old-word" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" class="old-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
-            echo '<button class="delete-this-filter">' . __('delete this filter', 'gsy-content-filter') . '</button>';
+            echo '<button class="delete-this-filter btn btn-danger btn-sm">' . __('delete', 'gsy-content-filter') . '</button>';
             echo '</p>';
         }
 
@@ -214,7 +232,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $field_id = 'new_word_' . $arg_list[0];
 
             printf(
-                    '<input type="text" class="new-word" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
+                    '<input type="text" class="new-word form-control" disabled="disabled" id="%1$s" name="gsy_content_filter_options[%1$s]" value="%2$s" />', $field_id, isset($this->_options[$field_id]) ? esc_attr($this->_options[$field_id]) : ''
             );
         }
 
@@ -222,7 +240,7 @@ if (!class_exists('GSY_Content_Filter')) {
             $arg_list = func_get_args();
             $field_id = 'filter_type_' . $arg_list[0];
 
-            $html = '<select class="filter-type" name="gsy_content_filter_options[' . $field_id . '][]" id="' . $field_id . '" disabled="disabled" multiple="multiple">';
+            $html = '<select class="filter-type form-control" name="gsy_content_filter_options[' . $field_id . '][]" id="' . $field_id . '" disabled="disabled" multiple="multiple">';
             foreach ($this->_filters as $k => $v) {
                 $selected = false;
 
@@ -246,8 +264,12 @@ if (!class_exists('GSY_Content_Filter')) {
                 $checked = '';
             }
 
-            $html = '<input type="checkbox" class="case-sensitive" name="gsy_content_filter_options[' . $field_id . ']" id="' . $field_id . '" ' . $checked . ' disabled="disabled"  />';
-            $html .= '<label for="' . $field_id . '" >' . __('case sensitive', 'gsy-content-filter') . '</label>';
+            $html = '<div class="checkbox">';
+            $html .= '<label>';
+            $html .= '<input type="checkbox" class="case-sensitive" name="gsy_content_filter_options[' . $field_id . ']" id="' . $field_id . '" ' . $checked . ' disabled="disabled"  />';
+            $html .= '  ' . __('case sensitive', 'gsy-content-filter');
+            $html .= '</label>';
+            $html .= '</div>';
 
             echo $html;
         }
