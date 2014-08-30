@@ -43,3 +43,7 @@ body {
         }
     }    
 }
+
+#adminmenuback {
+    z-index: 0; // fixes a bug caused by bootstrap
+}
